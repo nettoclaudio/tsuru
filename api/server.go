@@ -6,6 +6,7 @@ package api
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	stdLog "log"
 	"net/http"
@@ -679,11 +680,33 @@ func createServers(handler http.Handler) (*srvConfig, error) {
 		}
 	}
 	if tlsListen != "" {
+		tlsConfig := &tls.Config{
+			PreferServerCipherSuites: true,
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences: []tls.CurveID{
+				tls.CurveP256,
+				tls.CurveP384,
+				tls.CurveP521,
+			},
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+				0xc024, // ECDHE_ECDSA_WITH_AES_256_CBC_SHA384
+				0xc028, // ECDHE_RSA_WITH_AES_256_CBC_SHA384
+				tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+				tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+			},
+		}
 		srvConf.httpsSrv = &http.Server{
 			ReadTimeout:  time.Duration(readTimeout) * time.Second,
 			WriteTimeout: time.Duration(writeTimeout) * time.Second,
 			Addr:         tlsListen,
 			Handler:      handler,
+			TLSConfig:    tlsConfig,
 		}
 	}
 	return &srvConf, nil
