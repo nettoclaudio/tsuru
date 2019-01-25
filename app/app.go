@@ -18,7 +18,7 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/nu7hatch/gouuid"
+	uuid "github.com/nu7hatch/gouuid"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tsuru/tsuru/action"
@@ -30,6 +30,8 @@ import (
 	tsuruErrors "github.com/tsuru/tsuru/errors"
 	"github.com/tsuru/tsuru/event"
 	"github.com/tsuru/tsuru/healer"
+	"github.com/tsuru/tsuru/kv"
+	"github.com/tsuru/tsuru/kv/vault"
 	"github.com/tsuru/tsuru/log"
 	"github.com/tsuru/tsuru/permission"
 	"github.com/tsuru/tsuru/provision"
@@ -113,6 +115,8 @@ type App struct {
 	Quota       quota.Quota
 	builder     builder.Builder
 	provisioner provision.Provisioner
+
+	keyValueStorager kv.KeyValueStorager
 }
 
 var (
@@ -153,6 +157,15 @@ func (app *App) getProvisioner() (provision.Provisioner, error) {
 		app.provisioner, err = pool.GetProvisionerForPool(app.Pool)
 	}
 	return app.provisioner, err
+}
+
+func (app *App) getKeyValueStorager() (kv.KeyValueStorager, error) {
+	if app.keyValueStorager == nil {
+		// app.keyValueStorager = kv.GetDefaultKeyValueStorager(app.Name)
+		app.keyValueStorager = vault.NewVaultKeyValueStorager(app.Name)
+	}
+
+	return app.keyValueStorager, nil
 }
 
 // Units returns the list of units.
@@ -1134,10 +1147,27 @@ func (app *App) setEnv(env bind.EnvVar) {
 // getEnv returns the environment variable if it's declared in the app. It will
 // return an error if the variable is not defined in this app.
 func (app *App) getEnv(name string) (bind.EnvVar, error) {
-	if env, ok := app.Env[name]; ok {
-		return env, nil
+	es, err := app.getKeyValueStorager()
+
+	if err != nil {
+		return bind.EnvVar{}, errors.New("Ops")
 	}
+
+	env, err := es.Get(name)
+
+	if err != nil {
+		return bind.EnvVar{}, errors.New("Ops")
+	}
+
+	if len(env) > 0 {
+		return env[name], nil
+	}
+
 	return bind.EnvVar{}, errors.New("Environment variable not declared for this app.")
+}
+
+func (app *App) GetEnv(name string) (bind.EnvVar, error) {
+	return app.getEnv(name)
 }
 
 // validateNew checks app name format, pool and plan
@@ -1523,15 +1553,15 @@ func (app *App) GetDeploys() uint {
 
 // Envs returns a map representing the apps environment variables.
 func (app *App) Envs() map[string]bind.EnvVar {
-	mergedEnvs := make(map[string]bind.EnvVar, len(app.Env)+len(app.ServiceEnvs)+1)
-	for _, e := range app.Env {
-		mergedEnvs[e.Name] = e
+	storager, err := app.getKeyValueStorager()
+	if err != nil {
+		return nil
 	}
-	for _, e := range app.ServiceEnvs {
-		mergedEnvs[e.Name] = e.EnvVar
+	values, err := storager.Get()
+	if err != nil {
+		return nil
 	}
-	mergedEnvs[TsuruServicesEnvVar] = serviceEnvsFromEnvVars(app.ServiceEnvs)
-	return mergedEnvs
+	return values
 }
 
 // SetEnvs saves a list of environment variables in the app.
@@ -1551,6 +1581,18 @@ func (app *App) SetEnvs(setEnvs bind.SetEnvArgs) error {
 	for _, env := range setEnvs.Envs {
 		app.setEnv(env)
 	}
+
+	var envsVar []bind.EnvVar
+	app.getKeyValueStorager()
+	for _, v := range app.Env {
+		envsVar = append(envsVar, v)
+	}
+
+	err := app.keyValueStorager.Set(envsVar)
+	if err != nil {
+		return err
+	}
+
 	conn, err := db.Conn()
 	if err != nil {
 		return err
@@ -1578,6 +1620,14 @@ func (app *App) UnsetEnvs(unsetEnvs bind.UnsetEnvArgs) error {
 	for _, name := range unsetEnvs.VariableNames {
 		delete(app.Env, name)
 	}
+	kv, _ := app.getKeyValueStorager()
+
+	err := kv.Unset(unsetEnvs.VariableNames...)
+
+	if err != nil {
+		return err
+	}
+
 	conn, err := db.Conn()
 	if err != nil {
 		return err

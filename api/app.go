@@ -899,7 +899,7 @@ func writeEnvVars(w http.ResponseWriter, a *app.App, variables ...string) error 
 	w.Header().Set("Content-Type", "application/json")
 	if len(variables) > 0 {
 		for _, variable := range variables {
-			if v, ok := a.Env[variable]; ok {
+			if v, err := a.GetEnv(variable); err == nil {
 				result = append(result, v)
 			}
 		}

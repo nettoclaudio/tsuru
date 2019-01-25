@@ -224,6 +224,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:70830468ded1f737a2b5aa96a3188b30729d7eb9ca725799215a213a8e560489"
+  name = "github.com/derekparker/delve"
+  packages = ["service/test"]
+  pruneopts = "NUT"
+  revision = "9992fa83c16fc8612b33ad93ad29fbb524d1630c"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:fff28a0718d58de6fcf391a8f7122e1c7b28b253290c8d85bb04b11a0e66162e"
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
@@ -479,6 +487,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7f114b78210bf5b75f307fc97cff293633c835bab1e0ea8a744a44b39c042dfe"
+  name = "github.com/golang/snappy"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
+
+[[projects]]
+  branch = "master"
   digest = "1:c0883bc20a7c1ff552ff53d414f3cdc28fe847d15fab48c4486aa772ab2fb131"
   name = "github.com/google/btree"
   packages = ["."]
@@ -565,6 +581,53 @@
   revision = "22a0b1feae53974ed4cfe27bcce70dba061cc5fd"
 
 [[projects]]
+  digest = "1:f0d9d74edbd40fdeada436d5ac9cb5197407899af3fef85ff0137077ffe8ae19"
+  name = "github.com/hashicorp/errwrap"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "8a6fb523712970c966eefc6b39ed2c5e74880354"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:1a785a8e64510e5846777585472b393e2b98d2c153ce0298d305ec90b38bdbf7"
+  name = "github.com/hashicorp/go-cleanhttp"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ad28ea4487f05916463e2423a55166280e8254b5"
+
+[[projects]]
+  digest = "1:2ed138049ab373f696db2081ca48f15c5abdf20893803612a284f2bdce2bf443"
+  name = "github.com/hashicorp/go-multierror"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "886a7fbe3eb1c874d46f623bfa70af45f425b3d1"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:a829eb939bb66d283a2ffd5b0cd3960cac26e0467c6af8a9344116d6d317fabb"
+  name = "github.com/hashicorp/go-retryablehttp"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "d3a63d3c72068412f9ecd7c36faafd874d2e2888"
+  version = "v0.5.1"
+
+[[projects]]
+  digest = "1:cdb5ce76cd7af19e3d2d5ba9b6458a2ee804f0d376711215dd3df5f51100d423"
+  name = "github.com/hashicorp/go-rootcerts"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "63503fb4e1eca22f9ae0f90b49c5d5538a0e87eb"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:ab128c55634eb166f6ab170896ac0f53979992250811071938d6bf2af7034690"
+  name = "github.com/hashicorp/go-sockaddr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3aed17b5ee41761cc2b04f2a94c7107d428967e5"
+  version = "v1.0.1"
+
+[[projects]]
   digest = "1:4c625283f75c7f2847533bc411e273957aa0da42b299397ba924d0d9a06f115b"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
@@ -580,6 +643,40 @@
   ]
   pruneopts = "NUT"
   revision = "a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4"
+
+[[projects]]
+  digest = "1:39f543569bf189e228c84a294c50aca8ea56c82b3d9df5c9b788249907d7049a"
+  name = "github.com/hashicorp/hcl"
+  packages = [
+    ".",
+    "hcl/ast",
+    "hcl/parser",
+    "hcl/scanner",
+    "hcl/strconv",
+    "hcl/token",
+    "json/parser",
+    "json/scanner",
+    "json/token",
+  ]
+  pruneopts = "NUT"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:5b9aac5494a84e9e098d31ae0b6ef87983998b500f8bb08de0656712e7f81b1d"
+  name = "github.com/hashicorp/vault"
+  packages = [
+    "api",
+    "helper/compressutil",
+    "helper/consts",
+    "helper/hclutil",
+    "helper/jsonutil",
+    "helper/parseutil",
+    "helper/strutil",
+  ]
+  pruneopts = "NUT"
+  revision = "37a1dc9c477c1c68c022d2084550f25bf20cac33"
+  version = "v1.0.2"
 
 [[projects]]
   digest = "1:5147783016defe6ed7383e45915a8c4747b8c682644040730d8884d94b8dc47c"
@@ -693,6 +790,14 @@
   revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
 
 [[projects]]
+  digest = "1:a4df73029d2c42fabcb6b41e327d2f87e685284ec03edf76921c267d9cfc9c23"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:12daa99c0a1b087a7c4a174aceae0395e14ecc6555d075bcab3ca24a5a47ebb1"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
@@ -750,6 +855,17 @@
   pruneopts = "NUT"
   revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
   version = "v2.0.1"
+
+[[projects]]
+  digest = "1:1d920dce8e11bfff65b5709e883a8ece131b63a5bc4b2cd404f9ef7eb445f73f"
+  name = "github.com/pierrec/lz4"
+  packages = [
+    ".",
+    "internal/xxh32",
+  ]
+  pruneopts = "NUT"
+  revision = "635575b42742856941dbc767b44905bb9ba083f6"
+  version = "v2.0.7"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
@@ -839,6 +955,14 @@
   ]
   pruneopts = "NUT"
   revision = "c90cb954266e1bdd6d1914678fd6909fc5fabbfa"
+
+[[projects]]
+  digest = "1:09d61699d553a4e6ec998ad29816177b1f3d3ed0c18fe923d2c174ec065c99c8"
+  name = "github.com/ryanuber/go-glob"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "51a8f68e6c24dc43f1e371749c89a267de4ebc53"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:233a8bf9dd186376c4090bf5d28355d0d6d2c163e9a7e1f8c4b846a8a18231c2"
@@ -1145,6 +1269,14 @@
   ]
   pruneopts = "NUT"
   revision = "2bf8f2a19ec09c670e931282edfe6567f6be21c9"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9fdc2b55e8e0fafe4b41884091e51e77344f7dc511c5acedcfd98200003bff90"
+  name = "golang.org/x/time"
+  packages = ["rate"]
+  pruneopts = "NUT"
+  revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
 
 [[projects]]
   branch = "master"
@@ -1622,6 +1754,7 @@
     "github.com/aws/aws-sdk-go/service/ec2",
     "github.com/bradfitz/go-smtpd/smtpd",
     "github.com/codegangsta/negroni",
+    "github.com/derekparker/delve/service/test",
     "github.com/diego-araujo/go-saml",
     "github.com/digitalocean/godo",
     "github.com/digitalocean/godo/util",
@@ -1669,6 +1802,7 @@
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
     "github.com/hashicorp/go-version",
+    "github.com/hashicorp/vault/api",
     "github.com/kr/pretty",
     "github.com/mattn/go-shellwords",
     "github.com/nu7hatch/gouuid",
@@ -1708,6 +1842,7 @@
     "gopkg.in/amz.v3/ec2",
     "gopkg.in/amz.v3/ec2/ec2test",
     "gopkg.in/check.v1",
+    "gopkg.in/mgo.v2/bson",
     "gopkg.in/redis.v3",
     "gopkg.in/yaml.v2",
     "k8s.io/api/apps/v1beta2",
@@ -1737,6 +1872,7 @@
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/informers",
     "k8s.io/client-go/informers/core/v1",
+    "k8s.io/client-go/informers/internalinterfaces",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/kubernetes/scheme",
