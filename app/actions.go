@@ -174,8 +174,10 @@ var createAppToken = action.Action{
 		if token, ok := ctx.FWResult.(*auth.Token); ok {
 			tokenValue = (*token).GetValue()
 		} else if app, ok := ctx.Params[0].(*App); ok {
-			if tokenVar, ok := app.Env["TSURU_APP_TOKEN"]; ok {
-				tokenValue = tokenVar.Value
+			keyAppToken := "TSURU_APP_TOKEN"
+			env, err := app.getEnv(keyAppToken)
+			if err == nil {
+				tokenValue = env.Value
 			}
 		}
 		if tokenValue != "" {

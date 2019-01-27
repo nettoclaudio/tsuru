@@ -23,6 +23,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tsuru/tsuru/action"
 	"github.com/tsuru/tsuru/app/bind"
+	"github.com/tsuru/tsuru/app/envstore"
 	"github.com/tsuru/tsuru/app/image"
 	"github.com/tsuru/tsuru/auth"
 	"github.com/tsuru/tsuru/builder"
@@ -86,7 +87,6 @@ const (
 // This struct holds information about the app: its name, address, list of
 // teams that have access to it, used platform, etc.
 type App struct {
-	Env             map[string]bind.EnvVar
 	ServiceEnvs     []bind.ServiceEnvVar
 	Platform        string `bson:"framework"`
 	PlatformVersion string
@@ -113,6 +113,7 @@ type App struct {
 	Quota       quota.Quota
 	builder     builder.Builder
 	provisioner provision.Provisioner
+	envStorer   envstore.EnvStorer `bson:"env"`
 }
 
 var (
@@ -153,6 +154,13 @@ func (app *App) getProvisioner() (provision.Provisioner, error) {
 		app.provisioner, err = pool.GetProvisionerForPool(app.Pool)
 	}
 	return app.provisioner, err
+}
+
+func (app *App) getEnvStorer() (envstore.EnvStorer, error) {
+	if app.envStorer == nil {
+		app.envStorer = &envstore.MongoDB{}
+	}
+	return app.envStorer, nil
 }
 
 // Units returns the list of units.
@@ -721,7 +729,16 @@ func Delete(app *App, evt *event.Event, requestID string) error {
 	if err != nil {
 		logErr("Unable to remove app from repository manager", err)
 	}
-	token := app.Env["TSURU_APP_TOKEN"].Value
+	envStorer, err := app.getEnvStorer()
+	if err != nil {
+		logErr("Unable to get the environment storer", err)
+	}
+	keyAppToken := "TSURU_APP_TOKEN"
+	envs, err := envStorer.Get(keyAppToken)
+	if err != nil {
+		logErr("Unable to get the TSURU_APP_TOKEN", err)
+	}
+	token := envs[keyAppToken].Value
 	err = AuthScheme.AppLogout(token)
 	if err != nil {
 		logErr("Unable to remove app token in destroy", err)
@@ -1129,10 +1146,8 @@ func (app *App) getPoolForApp(poolName string) (string, error) {
 
 // setEnv sets the given environment variable in the app.
 func (app *App) setEnv(env bind.EnvVar) {
-	if app.Env == nil {
-		app.Env = make(map[string]bind.EnvVar)
-	}
-	app.Env[env.Name] = env
+	envStorer, _ := app.getEnvStorer()
+	envStorer.Set(env)
 	if env.Public {
 		app.Log(fmt.Sprintf("setting env %s with value %s", env.Name, env.Value), "tsuru", "api")
 	}
@@ -1141,10 +1156,26 @@ func (app *App) setEnv(env bind.EnvVar) {
 // getEnv returns the environment variable if it's declared in the app. It will
 // return an error if the variable is not defined in this app.
 func (app *App) getEnv(name string) (bind.EnvVar, error) {
-	if env, ok := app.Env[name]; ok {
-		return env, nil
+	envStorer, err := app.getEnvStorer()
+	if err != nil {
+		return bind.EnvVar{}, fmt.Errorf("Unable to get the environment variable: %v", err)
+	}
+	envs, err := envStorer.Get(name)
+	if err != nil {
+		return bind.EnvVar{}, err
+	}
+	if len(envs) > 0 {
+		return envs[name], nil
 	}
 	return bind.EnvVar{}, errors.New("Environment variable not declared for this app.")
+}
+
+func (app *App) unsetEnv(name string) error {
+	envStorer, err := app.getEnvStorer()
+	if err != nil {
+		return err
+	}
+	return envStorer.Unset(name)
 }
 
 // validateNew checks app name format, pool and plan
@@ -1530,9 +1561,11 @@ func (app *App) GetDeploys() uint {
 
 // Envs returns a map representing the apps environment variables.
 func (app *App) Envs() map[string]bind.EnvVar {
-	mergedEnvs := make(map[string]bind.EnvVar, len(app.Env)+len(app.ServiceEnvs)+1)
-	for _, e := range app.Env {
-		mergedEnvs[e.Name] = e
+	mergedEnvs := make(map[string]bind.EnvVar)
+	envStorer, _ := app.getEnvStorer()
+	envs, _ := envStorer.Get()
+	for name, env := range envs {
+		mergedEnvs[name] = env
 	}
 	for _, e := range app.ServiceEnvs {
 		mergedEnvs[e.Name] = e.EnvVar
@@ -1558,15 +1591,6 @@ func (app *App) SetEnvs(setEnvs bind.SetEnvArgs) error {
 	for _, env := range setEnvs.Envs {
 		app.setEnv(env)
 	}
-	conn, err := db.Conn()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	err = conn.Apps().Update(bson.M{"name": app.Name}, bson.M{"$set": bson.M{"env": app.Env}})
-	if err != nil {
-		return err
-	}
 	if setEnvs.ShouldRestart {
 		return app.restartIfUnits(setEnvs.Writer)
 	}
@@ -1583,16 +1607,9 @@ func (app *App) UnsetEnvs(unsetEnvs bind.UnsetEnvArgs) error {
 		fmt.Fprintf(unsetEnvs.Writer, "---- Unsetting %d environment variables ----\n", len(unsetEnvs.VariableNames))
 	}
 	for _, name := range unsetEnvs.VariableNames {
-		delete(app.Env, name)
-	}
-	conn, err := db.Conn()
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-	err = conn.Apps().Update(bson.M{"name": app.Name}, bson.M{"$set": bson.M{"env": app.Env}})
-	if err != nil {
-		return err
+		if err := app.unsetEnv(name); err != nil {
+			return err
+		}
 	}
 	if unsetEnvs.ShouldRestart {
 		return app.restartIfUnits(unsetEnvs.Writer)

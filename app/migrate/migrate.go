@@ -67,7 +67,8 @@ func MigrateAppTsuruServicesVarToServiceEnvs() error {
 	iter := conn.Apps().Find(nil).Iter()
 	var a app.App
 	for iter.Next(&a) {
-		serviceEnvVar := a.Env[app.TsuruServicesEnvVar]
+		envs := a.Envs()
+		serviceEnvVar := envs[app.TsuruServicesEnvVar]
 		if serviceEnvVar.Value == "" {
 			continue
 		}
