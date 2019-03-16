@@ -6,6 +6,7 @@ BUILD_DIR = build
 TSR_BIN = $(BUILD_DIR)/tsurud
 TSR_SRC = ./cmd/tsurud
 TSR_PKGS = $$(go list ./... | grep -v /vendor/)
+TSR_BUILD_EXTRAFLAGS = -v
 
 .PHONY: all check-path test race docs install tsurud $(TSR_BIN)
 
@@ -120,7 +121,7 @@ binaries: tsurud
 tsurud: $(TSR_BIN)
 
 $(TSR_BIN):
-	go build -o $(TSR_BIN) $(TSR_SRC)
+	go build $(TSR_BUILD_EXTRAFLAGS) -o $(TSR_BIN) $(TSR_SRC)
 
 run-tsurud-api: $(TSR_BIN)
 	$(TSR_BIN) api

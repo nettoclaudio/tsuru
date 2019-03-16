@@ -1,4 +1,7 @@
-**
-!tsurud
-!build/tsurud
-!etc/*
+.git/
+build/
+data/
+docs/
+
+*.env
+*.pem
