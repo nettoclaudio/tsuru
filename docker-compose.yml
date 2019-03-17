@@ -76,7 +76,7 @@ services:
     node1:
         image: docker:dind
         privileged: true
-        command: --insecure-registry 10.200.10.1:5000
+        command: --insecure-registry registry:5000
         ports:
             - "2375:2375"
             - "32768-32772:32768-32772"
