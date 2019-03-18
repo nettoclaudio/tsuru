@@ -1,100 +1,93 @@
-version: "3"
+version: '3'
+
 services:
-    mongo:
-        image: mongo
-        volumes:
-            - ./data/mongo:/data/db
-        networks:
-            - tsuru_net
-        ports:
-            - 27017:27017
-    redis:
-        image: redis
-        volumes:
-            - ./data/redis:/data
-        networks:
-            - tsuru_net
-        ports:
-            - "6379:6379"
-    registry:
-        image: registry:2
-        environment:
-            - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
-            - REGISTRY_STORAGE_DELETE_ENABLED=true
-        volumes:
-            - ./data/registry:/var/lib/registry
-        networks:
-            - tsuru_net
-        ports:
-            - 5000:5000
-    planb:
-        image: tsuru/planb
-        command: --read-redis-host=redis --write-redis-host=redis
-        depends_on:
-            - redis
-        ports:
-            - "8989:8989"
-        networks:
-            - tsuru_net
-    gandalf:
-        image: tsuru/gandalf:latest
-        environment:
-            - MONGODB_ADDR=mongo
-            - MONGODB_PORT=27017
-            - TSURU_HOST=http://api:8080
-            - TSURU_TOKEN=
-        volumes:
-            - ./data/gandalf/repositories:/var/lib/gandalf/repositories
-            - ./data/gandalf/ssh:/home/git/.ssh
-            - ./misc/git-hooks:/home/git/bare-template/hooks
-        networks:
-            - tsuru_net
-        ports:
-            - "22:22"
-    api:
-        build: ./
-        image: tsuru/api:dev
-        environment:
-            MONGODB_ADDR: mongo
-            MONGODB_PORT: 27017
-            HIPACHE_DOMAIN: tsuru.example.com
-            REDIS_ADDR: redis
-            REDIS_PORT: 6379
-            REGISTRY_ADDR: registry
-            REGISTRY_PORT: 5000
-            TSURU_ADDR: localhost
-            TSURU_PORT: 8080
-        ports:
-            - 8080:8080
-        depends_on:
-            - mongo
-            - gandalf
-            - redis
-            - registry
-        networks:
-            - tsuru_net
-    node1:
-        image: docker:dind
-        privileged: true
-        command: --insecure-registry registry:5000
-        ports:
-            - "2375:2375"
-            - "32768-32772:32768-32772"
-        networks:
-            - tsuru_net
-    service1:
-        build:
-            context: https://github.com/tsuru/eviaas.git
-        ports:
-            - 8888:8888
-        networks:
-            tsuru_net:
-                ipv4_address: 172.42.0.20
+  mongo:
+    image: mongo:4
+    volumes:
+    - mongodb-data:/data/db
+    networks:
+    - tsuru-network
+    ports:
+    - 27017:27017
+
+  redis:
+    image: redis:alpine
+    networks:
+    - tsuru-network
+    volumes:
+    - redis-data:/data
+    ports:
+    - 6379:6379
+
+  registry:
+    image: registry:2
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+    networks:
+    - tsuru-network
+    volumes:
+    - registry-data:/var/lib/registry
+    ports:
+    - 5000:5000
+
+  node1:
+    image: docker:dind
+    privileged: true
+    command: --insecure-registry registry:5000
+    networks:
+    - tsuru-network
+    ports:
+    - 2375:2375
+    - 32768-32772:32768-32772
+    depends_on:
+    - registry
+
+  planb:
+    image: tsuru/planb
+    command: --read-redis-host=redis --write-redis-host=redis --access-log=stdout
+    networks:
+    - tsuru-network
+    ports:
+    - 8989:8989
+    depends_on:
+    - redis
+
+  api:
+    build: ./
+    image: tsuru/api:dev
+    environment:
+      MONGODB_ADDR: ${MONGODB_ADDR:-mongo}
+      MONGODB_PORT: ${MONGODB_PORT:-27017}
+      HIPACHE_DOMAIN: ${HIPACHE_DOMAIN:-tsuru.example.com}
+      REDIS_ADDR: ${REDIS_ADDR:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REGISTRY_ADDR: ${REGISTRY_ADDR:-registry}
+      REGISTRY_PORT: ${REGISTRY_PORT:-5000}
+      TSURU_ADDR: ${TSURU_ADDR:-http://172.42.0.20}
+      TSURU_PORT: ${TSURU_PORT:-8080}
+    networks:
+      tsuru-network:
+        ipv4_address: 172.42.0.20
+    ports:
+    - 8080:8080
+    depends_on:
+    - mongo
+    - node1
+    - planb
+    - redis
+    - registry
 
 networks:
-  tsuru_net:
+  tsuru-network:
     driver: bridge
     ipam:
       driver: default
       config:
       - subnet: 172.42.0.0/24
+
+volumes:
+  mongodb-storage:
+  redis-storage:
+  registry-storage:
+
