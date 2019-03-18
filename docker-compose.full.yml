@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  gandalf:
+    image: tsuru/gandalf:latest
+    environment:
+      MONGODB_ADDR: ${MONGODB_ADDR:-mongo}
+      MONGODB_PORT: ${MONGODB_PORT:-27017}
+      TSURU_HOST: ${GANDALF_TSURU_HOST:-http://api:8080}
+      TSURU_TOKEN: ${GANDALF_TSURU_TOKEN:-}
+    networks:
+    - tsuru-network
+    volumes:
+    - gandalf-repositories-data:/var/lib/gandalf/repositories
+    - gandalf-ssh-data:/home/git/.ssh
+    - ./misc/git-hooks:/home/git/bare-template/hooks
+    ports:
+    - "22:22"
+    depends_on:
+    - api
+    - mongo
+
+  eviaas:
+    image: tsuru/eviaas
+    networks:
+    - tsuru-network
+    ports:
+    - 8888:8888
+
+volumes:
+  gandalf-repositories-data:
+  gandalf-ssh-data:
+

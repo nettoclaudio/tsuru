@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mongo:
-    image: mongo:4
+    image: mongo:latest
     volumes:
     - mongodb-data:/data/db
     networks:
@@ -48,6 +48,8 @@ services:
     command: --read-redis-host=redis --write-redis-host=redis --access-log=stdout
     networks:
     - tsuru-network
+    links:
+      - redis
     ports:
     - 8989:8989
     depends_on:
@@ -87,7 +89,7 @@ networks:
       - subnet: 172.42.0.0/24
 
 volumes:
-  mongodb-storage:
-  redis-storage:
-  registry-storage:
+  mongodb-data:
+  redis-data:
+  registry-data:
 
