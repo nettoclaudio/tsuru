@@ -61,6 +61,7 @@ services:
     environment:
       MONGODB_ADDR: ${MONGODB_ADDR:-mongo}
       MONGODB_PORT: ${MONGODB_PORT:-27017}
+      TSURU_REPO_MANAGER_ADDR: ${TSURU_REPO_MANAGER_ADDR:-none}
       HIPACHE_DOMAIN: ${HIPACHE_DOMAIN:-tsuru.example.com}
       REDIS_ADDR: ${REDIS_ADDR:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
