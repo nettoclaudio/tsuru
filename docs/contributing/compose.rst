@@ -13,8 +13,8 @@ This guide shows how to run Tsuru on a single host using Docker Compose. That ca
 
 To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later), `Docker Compose`_ (v1.10.0 or later) and the `Tsuru client`_. After getting these tools, make sure they are running correctly on your system.
 
-Installing
-----------
+Running Docker Compose
+----------------------
 
 First get the up-to-date Tsuru's source code available on GitHub and enter into the newly created directory.
 
@@ -23,11 +23,15 @@ First get the up-to-date Tsuru's source code available on GitHub and enter into 
    $ git clone https://github.com/tsuru/tsuru.git
    $ cd tsuru
 
-Run the Docker Compose to up the Tsuru API and its required services. On the first time, this action may take a long time running, be patient.
+Run the Docker Compose to up the Tsuru API and its required services. On the first time, this action may take a long time, be patient.
  
 .. code:: bash
 
    $ docker-compose up -d
+
+.. NOTE::
+    Everytime you change the Tsuru API and want testing it, you should rebuild that.
+    This can be archived by running the command ``docker-compose up --build -d api``.
 
 If everything works as expected, now you have all the needed services running on your machine. You can verify they are running using the command below:
 
@@ -35,24 +39,7 @@ If everything works as expected, now you have all the needed services running on
 
    $ docker-compose ps
 
-A similar output is shown below, you can use that as referece to find the correct address of services.
-
-    +--------------+-------+-------------------------+
-    | Service      | State | Address                 |
-    +==============+=======+=========================+
-    | ``api``      | Up    | ``127.0.0.1:8080/TCP``  |
-    +--------------+-------+-------------------------+
-    | ``mongo``    | Up    | ``127.0.0.1:27017/TCP`` |
-    +--------------+-------+-------------------------+
-    | ``node1``    | Up    | ``127.0.0.1:2375/TCP``  |
-    +--------------+-------+-------------------------+
-    | ``planb``    | Up    | ``127.0.0.1:8989/TCP``  |
-    +--------------+-------+-------------------------+
-    | ``redis``    | Up    | ``127.0.0.1:6379/TCP``  |
-    +--------------+-------+-------------------------+
-    | ``registry`` | Up    | ``127.0.0.1:5000/TCP``  |
-    +--------------+-------+-------------------------+
-
+Every service on this output should be running - with State field `Up`.
 For ensuring the Tsuru API is working properly, you can do an HTTP request on its health check endpoint, as shown below:
 
 .. code:: bash
@@ -65,45 +52,45 @@ The response message should be "WORKING" meaning the installation was successful
 Creating admin user
 -------------------
 
-Now you have a fresh instance of Tsuru installed, you need creating the super user.
-This user will be used to perform any.
+Now you have a fresh instance of Tsuru installed, you need creating a super-user.
+It will be used later to perform any actions on Tsuru.
 
-To create the administrator user, use the command below then type your password and confirm it.
+For creating the administrator user, you must execute an especial command *inside* the Tsuru API container, after hit that it will prompt the password for you. Do that following the command below:
 
 .. code:: bash
 
     $ docker-compose exec api tsurud root-user-create admin@example.com
 
-Great. You have been created the ``admin@example.com`` administrator user.
+Great. You had created the ``admin@example.com`` administrator user. Make sure to remember its email and password.
 
-On your tsuru 
+Now you can be use the newly created Tsuru API into your client, for this creat:
 
+.. code:: bash
 
-Adding Docker Node
+    $ tsuru target-add -s development http://127.0.0.1:8080
+    $ tsuru login
+
+The login command will prompt the email and password for you, fill that with the super-user credentials created above.
+
+Adding Tsuru Node
 ------------------
 
-Then configure the tsuru target:
+Right now you already are logged in into the local Tsuru API, you need to create one pool of nodes and register the ``node1`` as a Tsuru node.
 
-::
-
-    $ tsuru target-add development http://127.0.0.1:8080 -s
-
-You need to create one pool of nodes and add node1 as a tsuru node.
-::
+.. code:: bash
 
     $ tsuru pool-add development -p -d
     $ tsuru node-add --register address=http://node1:2375 pool=development
 
-Everytime you change tsuru and want to test you need to run ``build-compose.sh`` to build tsurud, generate and run the new api.
+You can verify if it was registered properly using the command below:
 
-If you want to use gandalf, generate one app token and insert into docker-compose.yml file in gandalf environment TSURU_TOKEN.
+.. code:: bash
 
-::
+    $ tsuru node-info http://node1:2375
 
-    $ docker-compose stop api
-    $ docker-compose run --entrypoint="/bin/sh -c" api "tsurud token"
-    // insert token into docker-compose.yml
-    $ docker-compose up -d
+The status of this Tsuru node should be marked as ``ready``.
+
+At this point you are ready to create and deploy apps using Tsuru.
 
 .. _Docker:  https://docs.docker.com/engine/installation/
 .. _`Docker Compose`: https://docs.docker.com/compose/install/
