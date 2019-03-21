@@ -10,9 +10,9 @@ This guide shows how to run Tsuru on a single host using Docker Compose.
 This installation method can be useful for development and test environments where the server does not need to be readily available for any user - only the developer.
 
 .. WARNING::
-    Do not run this installation method on production environments.
+   Do not run this installation method on production environments.
 
-To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later) and `Docker Compose`_ (v1.10.0 or later). After getting these tools, make sure they are running correctly on your system.
+To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later), `Docker Compose`_ (v1.10.0 or later) and `Tsuru client`_. After getting these tools, make sure they are running correctly on your system.
 
 Running Docker Compose
 ----------------------
@@ -20,25 +20,48 @@ Running Docker Compose
 Get the up-to-date Tsuru's source code available on GitHub and enter into that directory.
 
 .. code:: bash
-    $ git clone https://github.com/tsuru/tsuru.git
-    $ cd tsuru
+
+   $ git clone https://github.com/tsuru/tsuru.git
+   $ cd tsuru
 
 Then run the Docker Compose to up the Tsuru API and its required services. At first time this action may take a long time running, be patient.
  
 .. code:: bash
-    $ docker-compose up -d
 
-If everything works as expected, now you have Tsuru dependencies (such as MongoDB and Redis databases, PlanB application router and Registry), the Tsuru API and one Docker Node all them running in your machine. You can verify they are running using the command below:
+   $ docker-compose up -d
+
+If everything works as expected, now you have all needed dependencies, the Tsuru API and one Docker Node all them running in your machine. You can verify they are running using the command below:
 
 .. code:: bash
-    $ docker-compose ps
 
+   $ docker-compose ps
 
-You have a fresh tsuru installed, so you need to create the admin user running tsurud inside container.
+You can also do a HTTP on Tsuru API.
 
-::
+.. code:: bash
+
+   $ curl http://127.0.0.1:8080/healthcheck
+   WORKING
+
+Creating admin user
+-------------------
+
+Now you have a fresh instance of Tsuru installed, you need creating the super user.
+This user will be used to perform any.
+
+To create the administrator user, use the command below then type your password and confirm it.
+
+.. code:: bash
 
     $ docker-compose exec api tsurud root-user-create admin@example.com
+
+Great. You have been created the ``admin@example.com`` administrator user.
+
+On your tsuru 
+
+
+Adding Docker Node
+------------------
 
 Then configure the tsuru target:
 
@@ -66,6 +89,7 @@ If you want to use gandalf, generate one app token and insert into docker-compos
 .. _Docker:  https://docs.docker.com/engine/installation/
 .. _`Docker Compose`: https://docs.docker.com/compose/install/
 .. _Tsuru: https://github.com/tsuru/tsuru
+.. _`Tsuru client`: https://tsuru-client.readthedocs.io/en/latest/installing.html
 
 Kubernetes Integration
 ----------------------
