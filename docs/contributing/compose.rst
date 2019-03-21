@@ -6,42 +6,61 @@
 Building a development environment with Docker Compose
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-This guide shows how to run Tsuru on a single host using Docker Compose.
-This installation method can be useful for development and test environments where the server does not need to be readily available for any user - only the developer.
+This guide shows how to run Tsuru on a single host using Docker Compose. That can be useful for development and test environments because it allows quickly to start and down the entire stack of services and requires few hardware resources.
 
 .. WARNING::
-   Do not run this installation method on production environments.
+   Do not run this installation method on production or any other environments where the Tsuru API should be readily available for a user base - only the developer.
 
-To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later), `Docker Compose`_ (v1.10.0 or later) and `Tsuru client`_. After getting these tools, make sure they are running correctly on your system.
+To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later), `Docker Compose`_ (v1.10.0 or later) and the `Tsuru client`_. After getting these tools, make sure they are running correctly on your system.
 
-Running Docker Compose
-----------------------
+Installing
+----------
 
-Get the up-to-date Tsuru's source code available on GitHub and enter into that directory.
+First get the up-to-date Tsuru's source code available on GitHub and enter into the newly created directory.
 
 .. code:: bash
 
    $ git clone https://github.com/tsuru/tsuru.git
    $ cd tsuru
 
-Then run the Docker Compose to up the Tsuru API and its required services. At first time this action may take a long time running, be patient.
+Run the Docker Compose to up the Tsuru API and its required services. On the first time, this action may take a long time running, be patient.
  
 .. code:: bash
 
    $ docker-compose up -d
 
-If everything works as expected, now you have all needed dependencies, the Tsuru API and one Docker Node all them running in your machine. You can verify they are running using the command below:
+If everything works as expected, now you have all the needed services running on your machine. You can verify they are running using the command below:
 
 .. code:: bash
 
    $ docker-compose ps
 
-You can also do a HTTP on Tsuru API.
+A similar output is shown below, you can use that as referece to find the correct address of services.
+
+    +--------------+-------+-------------------------+
+    | Service      | State | Address                 |
+    +==============+=======+=========================+
+    | ``api``      | Up    | ``127.0.0.1:8080/TCP``  |
+    +--------------+-------+-------------------------+
+    | ``mongo``    | Up    | ``127.0.0.1:27017/TCP`` |
+    +--------------+-------+-------------------------+
+    | ``node1``    | Up    | ``127.0.0.1:2375/TCP``  |
+    +--------------+-------+-------------------------+
+    | ``planb``    | Up    | ``127.0.0.1:8989/TCP``  |
+    +--------------+-------+-------------------------+
+    | ``redis``    | Up    | ``127.0.0.1:6379/TCP``  |
+    +--------------+-------+-------------------------+
+    | ``registry`` | Up    | ``127.0.0.1:5000/TCP``  |
+    +--------------+-------+-------------------------+
+
+For ensuring the Tsuru API is working properly, you can do an HTTP request on its health check endpoint, as shown below:
 
 .. code:: bash
 
    $ curl http://127.0.0.1:8080/healthcheck
    WORKING
+
+The response message should be "WORKING" meaning the installation was successful.
 
 Creating admin user
 -------------------
