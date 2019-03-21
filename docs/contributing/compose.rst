@@ -6,33 +6,33 @@
 Building a development environment with Docker Compose
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-To follow this how-to you need to have Docker_ and Compose_ installed in your machine.
+This guide shows how to run Tsuru on a single host using Docker Compose.
+This installation method can be useful for development and test environments where the server does not need to be readily available for any user - only the developer.
 
-First clone the tsuru_ project from GitHub:
+.. WARNING::
+    Do not run this installation method on production environments.
 
-::
+To be able to follow this guide, you need installing the Docker_ (v1.13.0 or later) and `Docker Compose`_ (v1.10.0 or later). After getting these tools, make sure they are running correctly on your system.
 
+Running Docker Compose
+----------------------
+
+Get the up-to-date Tsuru's source code available on GitHub and enter into that directory.
+
+.. code:: bash
     $ git clone https://github.com/tsuru/tsuru.git
-
-Enter the ``tsuru`` directory and execute ``build-compose.sh``. It will
-take some time:
-
-::
-
     $ cd tsuru
-    $ ./build-compose.sh
 
-At the first time you run is possible that api and planb fails, just run ``docker-compose up -d`` to fix it.
-::
-
+Then run the Docker Compose to up the Tsuru API and its required services. At first time this action may take a long time running, be patient.
+ 
+.. code:: bash
     $ docker-compose up -d
 
-Now you have tsuru dependencies, tsuru api and one docker node running in your machine. You can check
-running ``docker-compose ps``:
+If everything works as expected, now you have Tsuru dependencies (such as MongoDB and Redis databases, PlanB application router and Registry), the Tsuru API and one Docker Node all them running in your machine. You can verify they are running using the command below:
 
-::
-
+.. code:: bash
     $ docker-compose ps
+
 
 You have a fresh tsuru installed, so you need to create the admin user running tsurud inside container.
 
@@ -63,9 +63,9 @@ If you want to use gandalf, generate one app token and insert into docker-compos
     // insert token into docker-compose.yml
     $ docker-compose up -d
 
-.. _Docker: https://docs.docker.com/engine/installation/
-.. _Compose: https://docs.docker.com/compose/install/
-.. _tsuru: https://github.com/tsuru/tsuru
+.. _Docker:  https://docs.docker.com/engine/installation/
+.. _`Docker Compose`: https://docs.docker.com/compose/install/
+.. _Tsuru: https://github.com/tsuru/tsuru
 
 Kubernetes Integration
 ----------------------
