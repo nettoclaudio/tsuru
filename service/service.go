@@ -30,6 +30,11 @@ type Service struct {
 	Teams        []string
 	Doc          string
 	IsRestricted bool `bson:"is_restricted"`
+	// IsMultiCluster indicates whether Service is running within the user's
+	// cluster (same pool of Tsuru Apps).
+	//
+	// This field is immutable (after creating Service).
+	IsMultiCluster bool `bson:"is_multi_cluster"`
 }
 
 type BindAppParameters map[string]interface{}
